@@ -3,11 +3,13 @@ using MiniUrl.Lib;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Transactions;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace MiniUrl.Dal {
     public class UrlCondenserService : IUrlCondenserService {
@@ -38,6 +40,9 @@ namespace MiniUrl.Dal {
         public Transaction<bool> Delete(string shortUrl) {
             var response = new Transaction<bool> { Data = false };
             try {
+                if(_condenser.TryRemove(shortUrl, out var data)) {
+                    response.Data = true;
+                }
 
             } catch(Exception e) {
                 Console.WriteLine(e.Message);
@@ -79,13 +84,7 @@ namespace MiniUrl.Dal {
         public Transaction<int> GetRetrievalCount(string shortUrl) {
             var response = new Transaction<int> { Data = 0 };
             try {
-
-                if(_condenser.TryGetValue(shortUrl, out var data)) {
-                    response.Data = data.ClickCount;
-                } else {
-                    throw new Exception("Short URL not found.");
-                }
-
+                response.Data = _condenser.TryGetValue(shortUrl, out var data) ? data.ClickCount : throw new Exception("Short URL not found.");
             } catch(Exception e) {
                 Console.WriteLine(e.Message);
                 response.HasError = true;

@@ -41,17 +41,14 @@ public class UrlCondenserController : ControllerBase {
     [HttpGet]
     public IActionResult GetRetrievalCount(string shortUrl) {
         var result = _urlCondenserService.GetRetrievalCount(shortUrl);
-        if(result.HasError) {
-            return NotFound(result.StatusMessage);
-        }
-
-        return Ok(result.Data);
+        return result.HasError ?  NotFound(result.StatusMessage) : Ok(result.Data);
     }
 
-    //[Route("/counter")]
-    //[HttpGet]
-    //public int GetCounter() {
-    //    return _urlCondenserService.updateCounter();
-    //}
-
+    [Route("/{shortUrl}")]
+    [HttpDelete]
+    public IActionResult Delete(string shortUrl) {
+        var result = _urlCondenserService.Delete(shortUrl);
+        return result.HasError ?  NotFound(result.StatusMessage) : Ok(result.Data);
+    }
 }
+
