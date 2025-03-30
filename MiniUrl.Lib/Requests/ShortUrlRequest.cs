@@ -8,6 +8,7 @@ namespace MiniUrl.Lib.Requests
 {
     public class ShortUrlRequest
     {
-        public string LongUrl { get; set; }
+        public required string LongUrl { get; set; }
+        public string? CustomShortUrl { get; set; }
     }
 }

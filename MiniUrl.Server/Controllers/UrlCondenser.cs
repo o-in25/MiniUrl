@@ -24,14 +24,28 @@ public class UrlCondenserController : ControllerBase {
 
     [Route("/minify")]
     [HttpPost]
-    public string GetCondensedUrl([FromBody] ShortUrlRequest request) => _urlCondenserService.Condense(request.LongUrl) ?? "";
+    public Transaction<string> GetCondensedUrl([FromBody] ShortUrlRequest request) => _urlCondenserService.Condense(request.LongUrl, request?.CustomShortUrl);
 
-    [Route("/{shortCode}")]
+    [Route("/{shortUrl}")]
     [HttpGet]
-    public IActionResult RedirectToLongUrl(string shortCode) {
-        var result = _urlCondenserService.Get(shortCode);
+    public IActionResult RediectFrom(string shortUrl) {
+        var result = _urlCondenserService.Get(shortUrl);
+        if(result.HasError) {
+            return NotFound("No URL found for entry");
+        }
 
-        return Redirect(result);
+        return Redirect(result.Data);
+    }
+
+    [Route("/{shortUrl}/count")]
+    [HttpGet]
+    public IActionResult GetRetrievalCount(string shortUrl) {
+        var result = _urlCondenserService.GetRetrievalCount(shortUrl);
+        if(result.HasError) {
+            return NotFound(result.StatusMessage);
+        }
+
+        return Ok(result.Data);
     }
 
     //[Route("/counter")]

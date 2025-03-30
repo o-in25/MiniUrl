@@ -13,9 +13,11 @@ namespace MiniUrl.Lib {
         public int ClickCount { get; set; } = 0;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        public string HashKey => GetHashKey(LongUrl);
+        public string HashKey => GetHashKey(LongUrl, CustomShortUrl);
 
-        private static string GetHashKey(string longUrl) {
+        private static string GetHashKey(string longUrl, string? customShortUrl = null) {
+            // return either custom key or hash
+            if(customShortUrl != null) return customShortUrl;
             byte[] hash = SHA256.HashData(Encoding.UTF8.GetBytes(longUrl));
             return Convert.ToBase64String(hash)[..8]
             .Replace('+', '-')
