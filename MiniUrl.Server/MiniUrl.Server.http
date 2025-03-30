@@ -1,0 +1,6 @@
+@MiniUrl.Server_HostAddress = http://localhost:5127
+
+GET {{MiniUrl.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

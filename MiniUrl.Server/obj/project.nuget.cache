@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "aHs7YdhxNuM=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\ehall\\source\\repos\\MiniUrl\\MiniUrl.Server\\MiniUrl.Server.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\ehall\\.nuget\\packages\\microsoft.aspnetcore.spaproxy\\9.0.3\\microsoft.aspnetcore.spaproxy.9.0.3.nupkg.sha512"
+  ],
+  "logs": []
+}

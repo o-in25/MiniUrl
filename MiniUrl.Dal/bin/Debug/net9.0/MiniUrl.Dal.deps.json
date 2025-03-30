@@ -1,0 +1,39 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v9.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v9.0": {
+      "MiniUrl.Dal/1.0.0": {
+        "dependencies": {
+          "MiniUrl.Lib": "1.0.0"
+        },
+        "runtime": {
+          "MiniUrl.Dal.dll": {}
+        }
+      },
+      "MiniUrl.Lib/1.0.0": {
+        "runtime": {
+          "MiniUrl.Lib.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "MiniUrl.Dal/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "MiniUrl.Lib/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}
