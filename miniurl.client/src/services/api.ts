@@ -20,3 +20,14 @@ export const getCondensedUrl = async(longUrl: string, customShortUrl: string | n
   });
   return response.text();
 }
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const deleteCondensedUrl = async(hashKey: string): Promise<string> => {
+  const response = await fetch(`urlcondenser/${hashKey}`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+  return response.text();
+}

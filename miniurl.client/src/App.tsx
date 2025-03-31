@@ -1,6 +1,7 @@
 import {useEffect, useState} from 'react';
 import './App.css';
 import {
+	Alert,
 	Button,
 	Label,
 	Table,
@@ -11,14 +12,14 @@ import {
 	TableRow,
 	TextInput,
 } from 'flowbite-react';
-import { getCondensedUrl, list } from './services/api';
+import {deleteCondensedUrl, getCondensedUrl, list} from './services/api';
 
-// TODO: 
+// TODO:
 // we could enable cors on the short url route
 // and do a 'redirect: 'follow'.
 // for time sake, I am just hardcoding the port
 // we could also add this as an env variable
-const HOSTNAME = "https://localhost:7094"
+const HOSTNAME = 'https://localhost:7094';
 
 interface ShortUrl {
 	longUrl: string;
@@ -33,37 +34,49 @@ interface ShortUrl {
 
 const App = () => {
 	const [rows, setRows] = useState<ShortUrl[]>([]);
-  const [formData, setFormData] = useState<Partial<ShortUrl>>({
-    longUrl: '',
-    customShortUrl: '',
-  });
+	const [formData, setFormData] = useState<Partial<ShortUrl>>({
+		longUrl: '',
+		customShortUrl: '',
+	});
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    console.log(name)
-    setFormData(prevData => ({
-      ...prevData,
-      [name]: value
-    }));
-  };
-
-	const populateTable = async () => {
-    const rows = await list();
-    setRows(rows);
+	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const {name, value} = e.target;
+		console.log(name);
+		setFormData(prevData => ({
+			...prevData,
+			[name]: value,
+		}));
 	};
 
-  const addUrl = async () => {
-    console.log(formData)
-    if(!formData.longUrl) return // TODO: throw an error here
-    await getCondensedUrl(formData.longUrl, formData.customShortUrl);
-    await populateTable();
-  }
+	const populateTable = async () => {
+		const rows = await list();
+		setRows(rows);
+	};
+
+	const addUrl = async () => {
+		if (!formData.longUrl) return; // TODO: throw an error here
+		await getCondensedUrl(formData.longUrl, formData.customShortUrl);
+		await populateTable();
+	};
+
+	const deleteUrl = async (hashKey: string) => {
+		await deleteCondensedUrl(hashKey);
+		await populateTable();
+	};
 
 	useEffect(() => {
 		populateTable();
 	}, []);
 	return (
 		<div className="mx-auto p-4">
+			<h1 className="mb-4 text-lg font-extrabold leading-none tracking-tight text-gray-900 md:text-5xl lg:text-6xl">
+				MiniURL
+			</h1>
+			<p className="mb-6 text-lg font-normal text-gray-500 lg:text-xl sm:px-16 xl:px-48 ">
+				URL shortening service with support for creating and deleting short URLs
+				from long ones.
+			</p>
+
 			<form className="flex flex-col gap-4">
 				<div className="grid gap-4 mb-4 md:grid-cols-3">
 					<div>
@@ -71,13 +84,12 @@ const App = () => {
 							<Label htmlFor="longUrl">Long URL</Label>
 						</div>
 						<TextInput
-              value={formData.longUrl}
-              onChange={handleChange}
-              name="longUrl"
+							value={formData.longUrl}
+							onChange={handleChange}
+							name="longUrl"
 							id="longUrl"
 							type="text"
 							placeholder="somereallylongurl.com"
-							shadow
 							required
 						/>
 					</div>
@@ -86,9 +98,9 @@ const App = () => {
 							<Label htmlFor="customShortUrl">Short URL (Optional)</Label>
 						</div>
 						<TextInput
-              value={formData?.customShortUrl || ''}
-              onChange={handleChange}
-              name="customShortUrl"
+							value={formData?.customShortUrl || ''}
+							onChange={handleChange}
+							name="customShortUrl"
 							id="customShortUrl"
 							type="text"
 							placeholder="shorturl.com"
@@ -99,13 +111,13 @@ const App = () => {
 					<Button
 						type="button"
 						className="mx-auto my-8 w-full"
-            onClick={addUrl}>
+						onClick={addUrl}>
 						Add
 					</Button>
 				</div>
 			</form>
 
-      {/* TODO: move the table to its own component if i have time */}
+			{/* TODO: move the table to its own component if i have time */}
 			<div className="overflow-x-auto">
 				<Table>
 					<TableHead>
@@ -119,28 +131,42 @@ const App = () => {
 						</TableRow>
 					</TableHead>
 					<TableBody className="divide-y">
-						{rows.map(
-							({ longUrl, clickCount, hashKey}, index) => (
-								<TableRow
-									className="bg-white"
-									key={index}>
-									<TableCell className="whitespace-nowrap font-medium text-gray-900 ">
-										<a>{longUrl}</a>
-									</TableCell>
-									<TableCell><a className="hover:underline" href={`${HOSTNAME}/${hashKey}`}>{hashKey}</a></TableCell>
-									<TableCell>{clickCount}</TableCell>
-									<TableCell>
-										<a
-											href="#"
-											className="font-medium text-cyan-600 hover:underline">
-											Edit
-										</a>
-									</TableCell>
-								</TableRow>
-							)
-						)}
+						{rows.map(({longUrl, clickCount, hashKey}, index) => (
+							<TableRow
+								className="bg-white"
+								key={index}>
+								<TableCell className="whitespace-nowrap font-medium text-gray-900 ">
+									<a>{longUrl}</a>
+								</TableCell>
+								<TableCell>
+									<a
+										className="hover:underline"
+										href={`${HOSTNAME}/${hashKey}`}>
+										{hashKey}
+									</a>
+								</TableCell>
+								<TableCell>{clickCount}</TableCell>
+								<TableCell>
+									<Button
+										type="button"
+										className="mx-auto float-right"
+										color={'red'}
+										onClick={() => deleteUrl(hashKey)}>
+										Delete
+									</Button>
+								</TableCell>
+							</TableRow>
+						))}
 					</TableBody>
 				</Table>
+				{rows.length === 0 && (
+					<div className="py-4 w-1/2 mx-auto">
+						<Alert color="info">
+							<span className="font-medium">No results found.</span> But you can
+							change that!
+						</Alert>
+					</div>
+				)}
 			</div>
 		</div>
 	);

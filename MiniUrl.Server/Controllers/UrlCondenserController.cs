@@ -41,7 +41,7 @@ public class UrlCondenserController : ControllerBase {
         return result.HasError ?  NotFound(result.StatusMessage) : Ok(result.Data);
     }
 
-    [Route("/{shortUrl}")]
+    [Route("{shortUrl}")]
     [HttpDelete]
     public IActionResult Delete(string shortUrl) {
         var result = _urlCondenserService.Delete(shortUrl);
