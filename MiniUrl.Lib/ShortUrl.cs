@@ -17,7 +17,7 @@ namespace MiniUrl.Lib {
 
         private static string GetHashKey(string longUrl, string? customShortUrl = null) {
             // return either custom key or hash
-            if(customShortUrl != null) return customShortUrl;
+            if(customShortUrl != null && customShortUrl != string.Empty) return customShortUrl;
             byte[] hash = SHA256.HashData(Encoding.UTF8.GetBytes(longUrl));
             return Convert.ToBase64String(hash)[..8]
             .Replace('+', '-')

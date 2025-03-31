@@ -6,6 +6,8 @@ import fs from 'fs';
 import path from 'path';
 import child_process from 'child_process';
 import { env } from 'process';
+import tailwindcss from '@tailwindcss/vite';
+import flowbiteReact from "flowbite-react/plugin/vite";
 
 const baseFolder =
     env.APPDATA !== undefined && env.APPDATA !== ''
@@ -34,12 +36,12 @@ if (!fs.existsSync(certFilePath) || !fs.existsSync(keyFilePath)) {
     }
 }
 
-const target = env.ASPNETCORE_HTTPS_PORT ? `https://localhost:${env.ASPNETCORE_HTTPS_PORT}` :
-    env.ASPNETCORE_URLS ? env.ASPNETCORE_URLS.split(';')[0] : 'https://localhost:7094';
+// const target = env.ASPNETCORE_HTTPS_PORT ? `https://localhost:${env.ASPNETCORE_HTTPS_PORT}` :
+//     env.ASPNETCORE_URLS ? env.ASPNETCORE_URLS.split(';')[0] : 'https://localhost:7094';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-    plugins: [plugin()],
+    plugins: [plugin(), tailwindcss(), flowbiteReact()],
     resolve: {
         alias: {
             '@': fileURLToPath(new URL('./src', import.meta.url))
@@ -47,9 +49,10 @@ export default defineConfig({
     },
     server: {
         proxy: {
-            '^/weatherforecast': {
-                target,
-                secure: false
+            '^/urlcondenser': {
+                target:'https://localhost:7094',
+                secure: false,
+
             }
         },
         port: parseInt(env.DEV_SERVER_PORT || '49977'),

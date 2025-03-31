@@ -1,58 +1,149 @@
-import { useEffect, useState } from 'react';
+import {useEffect, useState} from 'react';
 import './App.css';
+import {
+	Button,
+	Label,
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeadCell,
+	TableRow,
+	TextInput,
+} from 'flowbite-react';
+import { getCondensedUrl, list } from './services/api';
 
-interface Forecast {
-    date: string;
-    temperatureC: number;
-    temperatureF: number;
-    summary: string;
+// TODO: 
+// we could enable cors on the short url route
+// and do a 'redirect: 'follow'.
+// for time sake, I am just hardcoding the port
+// we could also add this as an env variable
+const HOSTNAME = "https://localhost:7094"
+
+interface ShortUrl {
+	longUrl: string;
+	customShortUrl?: string | null;
+	clickCount: number;
+	createdAt: string;
+	hashKey: string;
 }
 
-function App() {
-    const [forecasts, setForecasts] = useState<Forecast[]>();
+// TODO: we have this duplicated in the config,
+// move this to a shared export
 
-    useEffect(() => {
-        populateWeatherData();
-    }, []);
+const App = () => {
+	const [rows, setRows] = useState<ShortUrl[]>([]);
+  const [formData, setFormData] = useState<Partial<ShortUrl>>({
+    longUrl: '',
+    customShortUrl: '',
+  });
 
-    const contents = forecasts === undefined
-        ? <p><em>Loading... Please refresh once the ASP.NET backend has started. See <a href="https://aka.ms/jspsintegrationreact">https://aka.ms/jspsintegrationreact</a> for more details.</em></p>
-        : <table className="table table-striped" aria-labelledby="tableLabel">
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Temp. (C)</th>
-                    <th>Temp. (F)</th>
-                    <th>Summary</th>
-                </tr>
-            </thead>
-            <tbody>
-                {forecasts.map(forecast =>
-                    <tr key={forecast.date}>
-                        <td>{forecast.date}</td>
-                        <td>{forecast.temperatureC}</td>
-                        <td>{forecast.temperatureF}</td>
-                        <td>{forecast.summary}</td>
-                    </tr>
-                )}
-            </tbody>
-        </table>;
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    console.log(name)
+    setFormData(prevData => ({
+      ...prevData,
+      [name]: value
+    }));
+  };
 
-    return (
-        <div>
-            <h1 id="tableLabel">Weather forecast</h1>
-            <p>This component demonstrates fetching data from the server.</p>
-            {contents}
-        </div>
-    );
+	const populateTable = async () => {
+    const rows = await list();
+    setRows(rows);
+	};
 
-    async function populateWeatherData() {
-        const response = await fetch('weatherforecast');
-        if (response.ok) {
-            const data = await response.json();
-            setForecasts(data);
-        }
-    }
-}
+  const addUrl = async () => {
+    console.log(formData)
+    if(!formData.longUrl) return // TODO: throw an error here
+    await getCondensedUrl(formData.longUrl, formData.customShortUrl);
+    await populateTable();
+  }
+
+	useEffect(() => {
+		populateTable();
+	}, []);
+	return (
+		<div className="mx-auto p-4">
+			<form className="flex flex-col gap-4">
+				<div className="grid gap-4 mb-4 md:grid-cols-3">
+					<div>
+						<div className="mb-2 block text-left">
+							<Label htmlFor="longUrl">Long URL</Label>
+						</div>
+						<TextInput
+              value={formData.longUrl}
+              onChange={handleChange}
+              name="longUrl"
+							id="longUrl"
+							type="text"
+							placeholder="somereallylongurl.com"
+							shadow
+							required
+						/>
+					</div>
+					<div>
+						<div className="mb-2 block text-left">
+							<Label htmlFor="customShortUrl">Short URL (Optional)</Label>
+						</div>
+						<TextInput
+              value={formData?.customShortUrl || ''}
+              onChange={handleChange}
+              name="customShortUrl"
+							id="customShortUrl"
+							type="text"
+							placeholder="shorturl.com"
+							required
+							shadow
+						/>
+					</div>
+					<Button
+						type="button"
+						className="mx-auto my-8 w-full"
+            onClick={addUrl}>
+						Add
+					</Button>
+				</div>
+			</form>
+
+      {/* TODO: move the table to its own component if i have time */}
+			<div className="overflow-x-auto">
+				<Table>
+					<TableHead>
+						<TableRow>
+							<TableHeadCell>Long URL</TableHeadCell>
+							<TableHeadCell>Short URL</TableHeadCell>
+							<TableHeadCell>Clicked Count</TableHeadCell>
+							<TableHeadCell>
+								<span className="sr-only">Edit</span>
+							</TableHeadCell>
+						</TableRow>
+					</TableHead>
+					<TableBody className="divide-y">
+						{rows.map(
+							({ longUrl, clickCount, hashKey}, index) => (
+								<TableRow
+									className="bg-white"
+									key={index}>
+									<TableCell className="whitespace-nowrap font-medium text-gray-900 ">
+										<a>{longUrl}</a>
+									</TableCell>
+									<TableCell><a className="hover:underline" href={`${HOSTNAME}/${hashKey}`}>{hashKey}</a></TableCell>
+									<TableCell>{clickCount}</TableCell>
+									<TableCell>
+										<a
+											href="#"
+											className="font-medium text-cyan-600 hover:underline">
+											Edit
+										</a>
+									</TableCell>
+								</TableRow>
+							)
+						)}
+					</TableBody>
+				</Table>
+			</div>
+		</div>
+	);
+};
 
 export default App;

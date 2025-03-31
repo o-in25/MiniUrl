@@ -94,5 +94,19 @@ namespace MiniUrl.Dal {
             return response;
         }
 
+        public Transaction<ShortUrl[]> List() {
+            var response = new Transaction<ShortUrl[]> { Data = [] };
+            try {
+                if(!_condenser.IsEmpty) {
+                    response.Data = [.. _condenser.Values];
+                }
+            } catch(Exception e) {
+                Console.WriteLine(e.Message);
+                response.HasError = true;
+                response.StatusMessage = e.Message;
+            }
+
+            return response;
+        }
     }
 }

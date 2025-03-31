@@ -8,21 +8,18 @@ namespace MiniUrl.Server.Controllers;
 [ApiController]
 [Route("[controller]")]
 public class UrlCondenserController : ControllerBase {
-    private readonly ILogger<WeatherForecastController> _logger;
+    private readonly ILogger<IUrlCondenserService> _logger;
     private readonly IUrlCondenserService _urlCondenserService;
-    //public WeatherForecastController(ILogger<WeatherForecastController> logger) {
-    //    _logger = logger;
-    //}
 
     public UrlCondenserController(
-        ILogger<WeatherForecastController> logger,
+        ILogger<IUrlCondenserService> logger,
         IUrlCondenserService urlCondenserService
     ) {
         _logger = logger;
         _urlCondenserService = urlCondenserService;
     }
 
-    [Route("/minify")]
+    [Route("minify")]
     [HttpPost]
     public Transaction<string> GetCondensedUrl([FromBody] ShortUrlRequest request) => _urlCondenserService.Condense(request.LongUrl, request?.CustomShortUrl);
 
@@ -50,5 +47,9 @@ public class UrlCondenserController : ControllerBase {
         var result = _urlCondenserService.Delete(shortUrl);
         return result.HasError ?  NotFound(result.StatusMessage) : Ok(result.Data);
     }
+
+    [Route("list")]
+    [HttpGet]
+    public Transaction<ShortUrl[]> Get() => _urlCondenserService.List();
 }
 
